@@ -1,0 +1,1 @@
+Scripts to generate test hprof files. The goal is to deterministically generate hprof files that are similar enough for testing, which are modified the script's input parameters.

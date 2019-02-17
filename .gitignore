@@ -1,0 +1,22 @@
+/bin/
+/build/
+
+*~
+
+# Java
+*.class
+*.hprof
+
+# Eclipse
+.classpath
+.project
+/.settings/
+
+# Gradle
+/gradle/
+.gradle
+gradlew
+gradlew.bat
+
+# Vim
+*.swp

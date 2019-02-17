@@ -1,0 +1,56 @@
+plugins {
+	// Apply the java plugin to add support for Java
+	id 'java'
+
+	// Apply the application plugin to add support for building an application
+	id 'application'
+}
+
+version = '0.1'
+
+// Define the main class for the application
+mainClassName = 'App'
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'App'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+dependencies {
+	// https://mvnrepository.com/artifact/args4j/args4j
+	compile group: 'args4j', name: 'args4j', version: '2.33'
+
+	compile 'org.netbeans.modules:org-netbeans-lib-profiler:RELEASE82'
+	
+
+	// Use JUnit test framework
+	testCompile 'junit:junit:4.12'
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+	// Use jcenter for resolving your dependencies.
+	// You can declare any Maven/Ivy/file repository here.
+	jcenter()
+	maven {
+		url 'http://bits.netbeans.org/maven2'
+	}
+}
+
+apply plugin: 'eclipse'
+
+task printcp(type:JavaExec) {
+   println sourceSets.main.runtimeClasspath
+}
+
