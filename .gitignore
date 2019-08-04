@@ -7,6 +7,9 @@
 *.class
 *.hprof
 
+# IDEA Intellij
+.idea/
+
 # Eclipse
 .classpath
 .project
