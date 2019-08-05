@@ -8,11 +8,15 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.*;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import org.graphstream.graph.Edge;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * JavaFX does not let me pass Objects to the Application instance. It only allows passing
@@ -28,10 +32,38 @@ public class GraphVizDisplayer extends Application implements HeapGraphDisplayer
     private static ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
 
     public void display(HeapGraph heapGraph) {
-        MutableGraph g = mutGraph("example1").setDirected(true).add(
-                mutNode("a").add(Color.RED).addLink(mutNode("b")));
+        MutableGraph graph = mutGraph("example1").setDirected(true);
+
+        Map<String, MutableNode> nodes = new HashMap<>();
+
+        for(Map.Entry<String,Long> entry : heapGraph.getNodeCounts().entrySet()) {
+            String className = entry.getKey();
+            long count = entry.getValue();
+            MutableNode node = mutNode(className);
+            graph.add(node);
+            nodes.put(className, node);
+        }
+
+        for(Map.Entry<String, Map<String, Long>> edgeEntry : heapGraph.getEdgeCounts().entrySet()) {
+            String fromClass = edgeEntry.getKey();
+            Map<String, Long> subMap = edgeEntry.getValue();
+
+            for(Map.Entry<String,Long> entry :subMap.entrySet()) {
+                String toClass = entry.getKey();
+                long count = entry.getValue();
+                String edgeId = fromClass + "->" + toClass;
+
+                MutableNode fromNode = nodes.get(fromClass);
+                MutableNode toNode = nodes.get(toClass);
+
+                graph.addLink(fromNode.addLink(toNode));
+            }
+        }
+
         try {
-            Graphviz.fromGraph(g).width(200).render(Format.PNG).toOutputStream(byteArrayOut);
+            Graphviz.fromGraph(graph)
+                    .render(Format.PNG)
+                    .toOutputStream(byteArrayOut);
 
 
             Application.launch(GraphVizDisplayer.class);
@@ -46,17 +78,18 @@ public class GraphVizDisplayer extends Application implements HeapGraphDisplayer
         Image image = new Image(new ByteArrayInputStream(byteArrayOut.toByteArray()));
 
         // simple displays ImageView the image as is
-        ImageView iv1 = new ImageView();
-        iv1.setImage(image);
+        ImageView imageView = new ImageView();
+        imageView.setImage(image);
 
-        Group root = new Group();
-        Scene scene = new Scene(root);
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(imageView);
+
+        Scene scene = new Scene(scrollPane);
         scene.setFill(javafx.scene.paint.Color.WHITE);
-        root.getChildren().add(iv1);
 
-        stage.setTitle("ImageView");
-        stage.setWidth(415);
-        stage.setHeight(200);
+        stage.setTitle("Heap Graph Summary");
+        stage.setWidth(500);
+        stage.setHeight(500);
         stage.setScene(scene);
         stage.sizeToScene();
         stage.show();

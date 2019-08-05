@@ -26,9 +26,7 @@ public class GraphStreamDisplayer implements HeapGraphDisplayer {
                 String toClass = entry.getKey();
                 long count = entry.getValue();
                 String edgeId = fromClass + "->" + toClass;
-                System.out.println(edgeId + ", count: " + count);
                 Edge edge = graph.addEdge(edgeId, fromClass, toClass, true);
-                System.out.println("edge: " + edge);
                 edge.setAttribute("ui.label", count);
             }
         }
